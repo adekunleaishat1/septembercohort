@@ -1,7 +1,14 @@
 const express = require("express")
-  const app = express()
-   
+const app = express()
+ const ejs =   require("ejs")
 
+
+
+ // midddlewares
+ app.set("view engine", "ejs")
+ app.use(express.urlencoded())
+   
+const user = []
   const allusers = [
             {"id":"1","name":"patrick", "food":"semo", "class":"node"},
             {"id":"2","name":"lanre", "food":"rice", "class":"flutter"},
@@ -15,9 +22,10 @@ const express = require("express")
             {"id":"10","name":"ojett", "food":"bread", "class":"node"},
         ]
 
-  app.get("/",(request, response)=>{
-     response.send("Welcome to your node class")
 
+  app.get("/",(request, response)=>{
+   console.log(__dirname, "dirname");
+      response.render("index",{allusers, gender:"female"})
   })
 
 
@@ -35,7 +43,16 @@ const express = require("express")
       res.json({oneuser})
   })
 
+  app.get("/signup",(req, res)=>{
+   res.render("signup")
 
+  })
+
+  app.post("/user/signup",(req, res)=>{
+    console.log(req.body);
+    user.push(req.body)
+    res.redirect("/signup")
+  })
   
   const port = 8005
   app.listen(port,()=>{
