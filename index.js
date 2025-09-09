@@ -3,10 +3,11 @@ const app = express()
  const ejs =   require("ejs")
 
 
-
+let currentUser = ''
  // midddlewares
  app.set("view engine", "ejs")
  app.use(express.urlencoded())
+ let errormessage = ''
    
 const user = []
   const allusers = [
@@ -48,10 +49,43 @@ const user = []
 
   })
 
+  app.get("/login",(req, res)=>{
+       res.render("login",{errormessage})
+  })
+  app.get("/todo",(req, res)=>{
+     if (!currentUser) {
+         res.redirect("/login")
+     }else {
+      res.render("todo")
+     }
+  })
+
   app.post("/user/signup",(req, res)=>{
     console.log(req.body);
     user.push(req.body)
-    res.redirect("/signup")
+    res.redirect("/login")
+  })
+
+  app.post("/user/login",(req, res)=>{
+     console.log(req.body);
+     const { email, password} = req.body
+    const existuser = user.find((user)=> user.email === email)
+    console.log(existuser);
+    
+    if (existuser && existuser.password == password) {
+      console.log("login successful");
+      currentUser = existuser.email
+      console.log(currentUser);
+      
+      res.redirect("/todo")
+    }else{
+      console.log("invalid user ");
+      errormessage = "user does not exist , please Signup!!!."
+      res.redirect("/login")
+      
+    }
+     
+     
   })
   
   const port = 8005
