@@ -7,5 +7,26 @@
 </head>
 <body>
     <h1>Todo</h1>
+    <form action="/addtodo" method="post">
+        <label for="title">Title:</label>
+        <input type="text" name="title">
+        <label for="todoBody">Description:</label>
+        <input type="text" name="description">
+        <button type="submit">Add Todo</button>
+    </form>
+
+
+    <% todo.forEach((element, index) => { %>
+         <p><%= element.title %></p>
+         <p><%= element.description %></p>
+         <form action="/todo/delete" method="post">
+            <input name="index" hidden value="<%= index %>" type="text">
+            <button>Delete</button>
+         </form>
+         <form action="/edittodo/<%= index %>" method="get">
+            <button>Edit</button>
+         </form>
+         
+    <% }) %>
 </body>
 </html>

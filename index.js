@@ -52,14 +52,42 @@ const user = []
   app.get("/login",(req, res)=>{
        res.render("login",{errormessage})
   })
+
+  const todo = []
+
   app.get("/todo",(req, res)=>{
-     if (!currentUser) {
-         res.redirect("/login")
-     }else {
-      res.render("todo")
-     }
+    //  if (!currentUser) {
+    //      res.redirect("/login")
+    //  }else {
+      res.render("todo",{todo})      
+    //  }
   })
 
+  app.get("/edittodo/:index",(req, res)=>{
+    console.log(req.params);
+    const {index} = req.params
+    // console.log(todo[index]);
+    const onetodo = todo[index]
+    res.render("edit",{onetodo, index})
+  })
+
+  app.post("/addtodo", (req, res) =>{
+    console.log(req.body);
+    const {title , description} = req.body
+    if (!title || !description) {
+      message = "All fields are mandatory"
+      return res.redirect('/todo') 
+    }
+    todo.push(req.body)
+    console.log(todo);
+    return res.redirect('/todo') 
+  })
+  
+  app.post("/todo/delete",(req ,res)=>{
+    console.log(req.body.index);
+    todo.splice(req.body.index, 1)
+    res.redirect("/todo")
+  })
   app.post("/user/signup",(req, res)=>{
     console.log(req.body);
     user.push(req.body)
