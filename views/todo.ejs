@@ -16,7 +16,7 @@
     </form>
 
 
-    <% todo.forEach((element, index) => { %>
+    <% alltodo.forEach((element, index) => { %>
          <p><%= element.title %></p>
          <p><%= element.description %></p>
          <form action="/todo/delete" method="post">

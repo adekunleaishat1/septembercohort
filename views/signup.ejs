@@ -13,6 +13,11 @@
 <body>
     
     <form class="w-50 mx-auto px-3 py-3 shadow-md border" action="/user/signup" method="post">
+        <% if (errormessage !== "") { %>
+        <small class="alert alert-danger">
+            <%= errormessage %>
+        </small>
+        <% } %>
         <h1 class="text-center mt-3">Sign Up</h1>
         <input name="username" class="form-control mt-3" type="text" placeholder="Username">
         <input name="email" class="form-control mt-3" type="text" placeholder="Email">

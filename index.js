@@ -1,13 +1,42 @@
 const express = require("express")
 const app = express()
  const ejs =   require("ejs")
+ const mongoose = require("mongoose")
+const { type } = require("os")
+const { ref } = require("process")
 
 
-let currentUser = ''
+
+
  // midddlewares
  app.set("view engine", "ejs")
  app.use(express.urlencoded())
+
+
+
+let currentUser = ''
  let errormessage = ''
+
+ // CRUD CREATE READ UPDATE DELETE
+ // QUERIES
+
+const userschema = new mongoose.Schema({
+   username:{type:String, required:true, trim:true},
+   email:{type:String, unique:true, required:true, trim:true},
+   password:{type:String, required:true, trim:true},
+   verified:{type:Boolean, default:false},
+   profilepicture:{type:String}
+},{timestamps:true})
+
+const usermodel =  mongoose.model("users", userschema)
+
+const todoschema = new mongoose.Schema({
+  title:{type:String, required:true},
+  description:{type:String, required:true},
+  user:{type:mongoose.Schema.Types.ObjectId,ref:"users" }
+})
+const todomodel =  mongoose.model("todo", todoschema)
+
    
 const user = []
   const allusers = [
@@ -45,7 +74,7 @@ const user = []
   })
 
   app.get("/signup",(req, res)=>{
-   res.render("signup")
+   res.render("signup", {errormessage})
 
   })
 
@@ -55,12 +84,15 @@ const user = []
 
   const todo = []
 
-  app.get("/todo",(req, res)=>{
-    //  if (!currentUser) {
-    //      res.redirect("/login")
-    //  }else {
-      res.render("todo",{todo})      
-    //  }
+  app.get("/todo", async(req, res)=>{
+     if (!currentUser) {
+         res.redirect("/login")
+     }else {
+      const alltodo = await todomodel.find({user:currentUser}).populate("user","username")
+      console.log(alltodo);
+      
+      res.render("todo",{alltodo})      
+     }
   })
 
   app.get("/edittodo/:index",(req, res)=>{
@@ -71,16 +103,26 @@ const user = []
     res.render("edit",{onetodo, index})
   })
 
-  app.post("/addtodo", (req, res) =>{
-    console.log(req.body);
+  app.post("/addtodo", async (req, res) =>{
+   try {
+      console.log(req.body);
     const {title , description} = req.body
     if (!title || !description) {
       message = "All fields are mandatory"
       return res.redirect('/todo') 
     }
-    todo.push(req.body)
-    console.log(todo);
-    return res.redirect('/todo') 
+     const createdtodo =  await todomodel.create({
+      title,
+      description,
+      user:currentUser
+     })
+     if (createdtodo) {
+         return res.redirect('/todo') 
+     }
+   } catch (error) {
+    console.log(error);
+    
+   }
   })
   
   app.post("/todo/delete",(req ,res)=>{
@@ -88,21 +130,44 @@ const user = []
     todo.splice(req.body.index, 1)
     res.redirect("/todo")
   })
-  app.post("/user/signup",(req, res)=>{
-    console.log(req.body);
-    user.push(req.body)
-    res.redirect("/login")
+  app.post("/todo/update/:index",(req, res)=>{
+     const {index } = req.params
+     todo[index] = req.body
+     res.redirect("/todo")
+     
+  })
+  app.post("/user/signup", async (req, res)=>{
+   try {
+       console.log(req.body);
+     const newuser =  await usermodel.create(req.body)
+       console.log(newuser);
+       if (newuser) {
+        res.redirect("/login")
+       }
+   } catch (error) {
+    console.log(error);
+    if (error.message.includes("Septembersecondcohort.users index: email_1 dup key")) {
+      errormessage = "User already exist"
+     return res.redirect("/signup")
+    }
+    if (error.message.includes("users validation failed")) {
+      errormessage = "All fields are mandatory"
+       return res.redirect("/signup")
+    }
+     errormessage = "Network error"
+     return res.redirect("/signup")
+   }
   })
 
-  app.post("/user/login",(req, res)=>{
+  app.post("/user/login", async (req, res)=>{
      console.log(req.body);
      const { email, password} = req.body
-    const existuser = user.find((user)=> user.email === email)
+    const existuser = await usermodel.findOne ({email})
     console.log(existuser);
     
     if (existuser && existuser.password == password) {
       console.log("login successful");
-      currentUser = existuser.email
+      currentUser = existuser._id
       console.log(currentUser);
       
       res.redirect("/todo")
@@ -112,9 +177,28 @@ const user = []
       res.redirect("/login")
       
     }
-     
+   
      
   })
+
+
+  const uri = "mongodb+srv://aishatadekunle877:aishat@cluster0.t92x8pf.mongodb.net/Septembersecondcohort?retryWrites=true&w=majority&appName=Cluster0"
+
+    const connect = async () =>{
+      try {
+        const connect = await  mongoose.connect(uri)
+        if (connect) {
+          console.log("database connected successfully");
+          
+        }
+      } catch (error) {
+        console.log(error);
+        
+      }
+    }
+
+connect()
+
   
   const port = 8005
   app.listen(port,()=>{
