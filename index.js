@@ -2,16 +2,15 @@ const express = require("express")
 const app = express()
  const ejs =   require("ejs")
  const mongoose = require("mongoose")
-const { type } = require("os")
-const { ref } = require("process")
-
-
-
+require("dotenv").config()
+const connect = require("./Database/db.connect")
+const usermodel = require("./model/user.model")
+const userrouter = require("./route/user.route")
 
  // midddlewares
  app.set("view engine", "ejs")
  app.use(express.urlencoded())
-
+app.use("/", userrouter)
 
 
 let currentUser = ''
@@ -19,16 +18,6 @@ let currentUser = ''
 
  // CRUD CREATE READ UPDATE DELETE
  // QUERIES
-
-const userschema = new mongoose.Schema({
-   username:{type:String, required:true, trim:true},
-   email:{type:String, unique:true, required:true, trim:true},
-   password:{type:String, required:true, trim:true},
-   verified:{type:Boolean, default:false},
-   profilepicture:{type:String}
-},{timestamps:true})
-
-const usermodel =  mongoose.model("users", userschema)
 
 const todoschema = new mongoose.Schema({
   title:{type:String, required:true},
@@ -39,32 +28,11 @@ const todomodel =  mongoose.model("todo", todoschema)
 
    
 const user = []
-  const allusers = [
-            {"id":"1","name":"patrick", "food":"semo", "class":"node"},
-            {"id":"2","name":"lanre", "food":"rice", "class":"flutter"},
-            {"id":"3","name":"Umar", "food":"baens", "class":"react"},
-            {"id":"4","name":"ayomide", "food":"spagheti", "class":"angular"},
-            {"id":"5","name":"ore", "food":"money", "class":"node"},
-            {"id":"6","name":"yomi", "food":"amala", "class":"react"},
-            {"id":"7","name":"john", "food":"shawama", "class":"vue"},
-            {"id":"8","name":"bimpe", "food":"bread", "class":"node"},
-            {"id":"9","name":"gbolahan", "food":"plantain", "class":"react"},
-            {"id":"10","name":"ojett", "food":"bread", "class":"node"},
-        ]
+
+ 
 
 
-  app.get("/",(request, response)=>{
-   console.log(__dirname, "dirname");
-      response.render("index",{allusers, gender:"female"})
-  })
-
-
-  app.get("/user", (req, res)=>{
-     res.json({
-        "users":allusers
-     })
-  })
-
+  
 
   app.get("/user/:id",(req, res)=>{
     console.log(req.params.id);
@@ -95,12 +63,14 @@ const user = []
      }
   })
 
-  app.get("/edittodo/:index",(req, res)=>{
+  app.get("/edittodo/:id", async (req, res)=>{
     console.log(req.params);
-    const {index} = req.params
+    const {id} = req.params
     // console.log(todo[index]);
-    const onetodo = todo[index]
-    res.render("edit",{onetodo, index})
+    const onetodo = await todomodel.findOne({
+      _id:id
+    })
+    res.render("edit",{onetodo, id})
   })
 
   app.post("/addtodo", async (req, res) =>{
@@ -125,16 +95,37 @@ const user = []
    }
   })
   
-  app.post("/todo/delete",(req ,res)=>{
-    console.log(req.body.index);
-    todo.splice(req.body.index, 1)
-    res.redirect("/todo")
+  app.post("/todo/delete", async(req ,res)=>{
+    try {
+         console.log(req.body.id);
+         const {id} = req.body
+     const deletedtodo = await todomodel.findByIdAndDelete(id)
+     if (deletedtodo) {
+      res.redirect("/todo")
+     }
+      
+    } catch (error) {
+      console.log(error);
+      
+   }
   })
-  app.post("/todo/update/:index",(req, res)=>{
-     const {index } = req.params
-     todo[index] = req.body
-     res.redirect("/todo")
+  app.post("/todo/update/:id", async(req, res)=>{
+   try {
+       const { id } = req.params
+       console.log(req.body);
+       const {title, description} = req.body
+     const updated =  await  todomodel.findByIdAndUpdate(
+        id,
+        {$set:{title,description}}
+      )
+      if (updated) {
+         res.redirect("/todo")
+      }
      
+   } catch (error) {
+    console.log(error);
+    
+   }
   })
   app.post("/user/signup", async (req, res)=>{
    try {
@@ -182,26 +173,18 @@ const user = []
   })
 
 
-  const uri = "mongodb+srv://aishatadekunle877:aishat@cluster0.t92x8pf.mongodb.net/Septembersecondcohort?retryWrites=true&w=majority&appName=Cluster0"
-
-    const connect = async () =>{
-      try {
-        const connect = await  mongoose.connect(uri)
-        if (connect) {
-          console.log("database connected successfully");
-          
-        }
-      } catch (error) {
-        console.log(error);
-        
-      }
-    }
-
-connect()
-
   
+ connect()
+
   const port = 8005
   app.listen(port,()=>{
       console.log(`app started at port ${port}`);
       
   })
+
+
+
+
+
+
+  

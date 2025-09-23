@@ -20,10 +20,10 @@
          <p><%= element.title %></p>
          <p><%= element.description %></p>
          <form action="/todo/delete" method="post">
-            <input name="index" hidden value="<%= index %>" type="text">
+            <input name="id" hidden value="<%= element._id%>" type="text">
             <button>Delete</button>
          </form>
-         <form action="/edittodo/<%= index %>" method="get">
+         <form action="/edittodo/<%= element._id%>" method="get">
             <button>Edit</button>
          </form>
          

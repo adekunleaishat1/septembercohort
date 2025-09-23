@@ -6,7 +6,7 @@
     <title>Document</title>
 </head>
 <body>
-    <form action="/todo/update/<%= index %>" method="post">
+    <form action="/todo/update/<%= onetodo._id %>" method="post">
         <label for="title">Title:</label>
         <input value="<%= onetodo.title %>" type="text" name="title">
         <label for="todoBody">Description:</label>
