@@ -19,12 +19,7 @@ let currentUser = ''
  // CRUD CREATE READ UPDATE DELETE
  // QUERIES
 
-const todoschema = new mongoose.Schema({
-  title:{type:String, required:true},
-  description:{type:String, required:true},
-  user:{type:mongoose.Schema.Types.ObjectId,ref:"users" }
-})
-const todomodel =  mongoose.model("todo", todoschema)
+
 
    
 const user = []
@@ -41,28 +36,9 @@ const user = []
       res.json({oneuser})
   })
 
-  app.get("/signup",(req, res)=>{
-   res.render("signup", {errormessage})
+ 
 
-  })
-
-  app.get("/login",(req, res)=>{
-       res.render("login",{errormessage})
-  })
-
-  const todo = []
-
-  app.get("/todo", async(req, res)=>{
-     if (!currentUser) {
-         res.redirect("/login")
-     }else {
-      const alltodo = await todomodel.find({user:currentUser}).populate("user","username")
-      console.log(alltodo);
-      
-      res.render("todo",{alltodo})      
-     }
-  })
-
+ 
   app.get("/edittodo/:id", async (req, res)=>{
     console.log(req.params);
     const {id} = req.params
@@ -126,50 +102,6 @@ const user = []
     console.log(error);
     
    }
-  })
-  app.post("/user/signup", async (req, res)=>{
-   try {
-       console.log(req.body);
-     const newuser =  await usermodel.create(req.body)
-       console.log(newuser);
-       if (newuser) {
-        res.redirect("/login")
-       }
-   } catch (error) {
-    console.log(error);
-    if (error.message.includes("Septembersecondcohort.users index: email_1 dup key")) {
-      errormessage = "User already exist"
-     return res.redirect("/signup")
-    }
-    if (error.message.includes("users validation failed")) {
-      errormessage = "All fields are mandatory"
-       return res.redirect("/signup")
-    }
-     errormessage = "Network error"
-     return res.redirect("/signup")
-   }
-  })
-
-  app.post("/user/login", async (req, res)=>{
-     console.log(req.body);
-     const { email, password} = req.body
-    const existuser = await usermodel.findOne ({email})
-    console.log(existuser);
-    
-    if (existuser && existuser.password == password) {
-      console.log("login successful");
-      currentUser = existuser._id
-      console.log(currentUser);
-      
-      res.redirect("/todo")
-    }else{
-      console.log("invalid user ");
-      errormessage = "user does not exist , please Signup!!!."
-      res.redirect("/login")
-      
-    }
-   
-     
   })
 
 
