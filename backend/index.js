@@ -6,7 +6,7 @@ const userrouter = require("./route/user.route")
 const cors = require("cors")
 const ejs = require("ejs")
 
-app.use(express.json())
+app.use(express.json({limit:"50mb"}))
 app.use(cors({origin:"*"}))
 app.use("/user", userrouter)
 app.set("view engine", "ejs")

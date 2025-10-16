@@ -6,7 +6,10 @@ const userschema = new mongoose.Schema({
    email:{type:String, unique:true, required:true, trim:true},
    password:{type:String, required:true, trim:true},
    verified:{type:Boolean, default:false},
-   profilepicture:{type:String},
+   profilepicture:{
+      url:{type:String},
+      public_id:{type:String}
+   },
    otp:{type:String, required:true}
 },{timestamps:true})
 

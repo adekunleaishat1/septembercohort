@@ -27,6 +27,8 @@ const Login = () => {
                 toast.success("Login successful")
                 navigate("/dashboard")
               }).catch((err)=>{
+                console.log(err);
+                
                 const errormessage = err.response.data?.message
                 toast.error(errormessage)
               }).finally(()=>{
