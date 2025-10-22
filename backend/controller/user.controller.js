@@ -92,16 +92,20 @@ const Verifypage = async (req,res) =>{
 const ProfileUpdate = async (req, res) =>{
 try {
   const {image} = req.body
-   const token = req.headers.authorization.split(" ")[1]
-  console.log(token);
-    const verifiedToken =  await jwt.verify(token, process.env.SECRETKEY)
-   if (!verifiedToken) {
-       return res.status(400).json({message:"Invalid Token", status:false})   
+   console.log(req.user, "Verified user");
+   const userid = req.user
+   const user = await usermodel.findById(userid)
+   console.log(user, "user information");
+   
+   const previousProfile = user.profilepicture?.public_id
+   console.log(previousProfile, "existing pubic_id");
+   if (previousProfile) {
+   await cloudinary.uploader.destroy(previousProfile)
     
    }
    const uploadresult = await cloudinary.uploader.upload(image)
    const newprofile =  await usermodel.findByIdAndUpdate(
-      verifiedToken.id,
+      userid,
       {$set:{profilepicture:{
         url:uploadresult.secure_url,
         public_id:uploadresult.public_id

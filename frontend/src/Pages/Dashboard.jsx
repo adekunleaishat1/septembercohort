@@ -38,7 +38,7 @@ const Dashboard = () => {
     const ProfileUpload = () =>{
        axios.patch("http://localhost:8005/user/profile/update",{image},{
         headers:{
-            "Authorization":`bearer ${token}`,
+            "Authorization":`Bearer ${token}`,
             "Content-Type":"Application/json",
             "Accept":"Application/json"
         }
