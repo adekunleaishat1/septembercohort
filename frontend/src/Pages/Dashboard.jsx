@@ -15,6 +15,7 @@ const Dashboard = () => {
         }
       }).then((res)=>{
         console.log(res);
+        localStorage.setItem("cur_user", JSON.stringify(res.data.user))
         
       }).catch((error)=>{
         const errormessage =  error.response.data?.message
